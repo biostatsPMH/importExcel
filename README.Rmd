@@ -40,7 +40,7 @@ devtools::install_github("biostatsPMH/importExcel")
 
 ## Documentation
 
-[Online Documentation](https://biostatsPMH.github.io/importExcel/)
+[Online Documentation](https://biostatspmh.github.io/importExcel/)
 
 ## Example 1: Tidy Data
 

@@ -4,18 +4,18 @@
 
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Sample Data | Using the Excel dataChecker macro and the importExcel package</title>
-  <meta name="description" content="Sample Data | Using the Excel dataChecker macro and the importExcel package" />
+  <title>Using the CheckData Macro | Using the Excel dataChecker macro and the importExcel package</title>
+  <meta name="description" content="Using the CheckData Macro | Using the Excel dataChecker macro and the importExcel package" />
   <meta name="generator" content="bookdown 0.41.2 and GitBook 2.6.7" />
 
-  <meta property="og:title" content="Sample Data | Using the Excel dataChecker macro and the importExcel package" />
+  <meta property="og:title" content="Using the CheckData Macro | Using the Excel dataChecker macro and the importExcel package" />
   <meta property="og:type" content="book" />
   
   
   
 
   <meta name="twitter:card" content="summary" />
-  <meta name="twitter:title" content="Sample Data | Using the Excel dataChecker macro and the importExcel package" />
+  <meta name="twitter:title" content="Using the CheckData Macro | Using the Excel dataChecker macro and the importExcel package" />
   
   
   
@@ -28,8 +28,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black" />
   
   
-<link rel="prev" href="example-import.html"/>
-
+<link rel="prev" href="workflow.html"/>
+<link rel="next" href="editing-the-dictionary-sheet.html"/>
 <script src="libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6/dist/fuse.min.js"></script>
 <link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
@@ -187,51 +187,45 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="page-inner">
 
             <section class="normal" id="section-">
-<div id="sec-sample-data" class="section level2 hasAnchor">
-<h2>Sample Data<a href="sec-sample-data.html#sec-sample-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
-<p>The package installs two sample files: <code>study_data.xlsx</code> and <code>study_data_messy.xlsx</code></p>
-<p>The following code can be copied and run to view the first file:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="sec-sample-data.html#cb5-1" tabindex="-1"></a>tidy_data <span class="ot">&lt;-</span> <span class="st">&quot;study_data.xlsx&quot;</span></span>
-<span id="cb5-2"><a href="sec-sample-data.html#cb5-2" tabindex="-1"></a>messy_data <span class="ot">&lt;-</span> <span class="st">&quot;study_data_messy.xlsx&quot;</span></span>
-<span id="cb5-3"><a href="sec-sample-data.html#cb5-3" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="sec-sample-data.html#cb5-4" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, tidy_data, <span class="at">package =</span> <span class="st">&quot;importExcel&quot;</span>)</span>
-<span id="cb5-5"><a href="sec-sample-data.html#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="sec-sample-data.html#cb5-6" tabindex="-1"></a><span class="co"># Check if the file exists</span></span>
-<span id="cb5-7"><a href="sec-sample-data.html#cb5-7" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(file_path)) {</span>
-<span id="cb5-8"><a href="sec-sample-data.html#cb5-8" tabindex="-1"></a>  <span class="co"># Open the file using the default system application (Excel)</span></span>
-<span id="cb5-9"><a href="sec-sample-data.html#cb5-9" tabindex="-1"></a>  </span>
-<span id="cb5-10"><a href="sec-sample-data.html#cb5-10" tabindex="-1"></a>  <span class="co"># For Windows</span></span>
-<span id="cb5-11"><a href="sec-sample-data.html#cb5-11" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Windows&quot;</span>) {</span>
-<span id="cb5-12"><a href="sec-sample-data.html#cb5-12" tabindex="-1"></a>    <span class="fu">shell.exec</span>(file_path)</span>
-<span id="cb5-13"><a href="sec-sample-data.html#cb5-13" tabindex="-1"></a>  }</span>
-<span id="cb5-14"><a href="sec-sample-data.html#cb5-14" tabindex="-1"></a>  </span>
-<span id="cb5-15"><a href="sec-sample-data.html#cb5-15" tabindex="-1"></a>  <span class="co"># For macOS</span></span>
-<span id="cb5-16"><a href="sec-sample-data.html#cb5-16" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Darwin&quot;</span>) {</span>
-<span id="cb5-17"><a href="sec-sample-data.html#cb5-17" tabindex="-1"></a>    <span class="fu">system</span>(<span class="fu">paste</span>(<span class="st">&quot;open&quot;</span>, <span class="fu">shQuote</span>(file_path)))</span>
-<span id="cb5-18"><a href="sec-sample-data.html#cb5-18" tabindex="-1"></a>  }</span>
-<span id="cb5-19"><a href="sec-sample-data.html#cb5-19" tabindex="-1"></a>  </span>
-<span id="cb5-20"><a href="sec-sample-data.html#cb5-20" tabindex="-1"></a>  <span class="co"># For Linux</span></span>
-<span id="cb5-21"><a href="sec-sample-data.html#cb5-21" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Linux&quot;</span>) {</span>
-<span id="cb5-22"><a href="sec-sample-data.html#cb5-22" tabindex="-1"></a>    <span class="fu">system</span>(<span class="fu">paste</span>(<span class="st">&quot;xdg-open&quot;</span>, <span class="fu">shQuote</span>(file_path)))</span>
-<span id="cb5-23"><a href="sec-sample-data.html#cb5-23" tabindex="-1"></a>  }</span>
-<span id="cb5-24"><a href="sec-sample-data.html#cb5-24" tabindex="-1"></a>  </span>
-<span id="cb5-25"><a href="sec-sample-data.html#cb5-25" tabindex="-1"></a>  <span class="co"># If the OS is not recognized</span></span>
-<span id="cb5-26"><a href="sec-sample-data.html#cb5-26" tabindex="-1"></a>  <span class="cf">else</span> {</span>
-<span id="cb5-27"><a href="sec-sample-data.html#cb5-27" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Unable to open file: Unrecognized operating system&quot;</span>)</span>
-<span id="cb5-28"><a href="sec-sample-data.html#cb5-28" tabindex="-1"></a>  }</span>
-<span id="cb5-29"><a href="sec-sample-data.html#cb5-29" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb5-30"><a href="sec-sample-data.html#cb5-30" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;File  not found in the package&#39;s inst/extdata directory&quot;</span>)</span>
-<span id="cb5-31"><a href="sec-sample-data.html#cb5-31" tabindex="-1"></a>}</span></code></pre></div>
-
+<div id="using-the-checkdata-macro" class="section level2 hasAnchor">
+<h2>Using the CheckData Macro<a href="using-the-checkdata-macro.html#using-the-checkdata-macro" class="anchor-section" aria-label="Anchor link to header"></a></h2>
+<p>This macro will:</p>
+<ul>
+<li>highlight problems with the data on the data sheet</li>
+<li>create a data dictionary sheet at the end of the document that is used to import the data</li>
+</ul>
+<div class="callout-note">
+<p><strong>Please note</strong> Excel code is slow to run – this may take a 15-30 seconds for large files.</p>
 </div>
-<!-- </div> -->
+<div id="to-run-the-macro" class="section level3 hasAnchor">
+<h3>To Run the Macro<a href="using-the-checkdata-macro.html#to-run-the-macro" class="anchor-section" aria-label="Anchor link to header"></a></h3>
+<ol style="list-style-type: decimal">
+<li>Open the data file in Excel</li>
+<li>Make sure the data sheet you want to check is the active sheet</li>
+<li>Click The <code>Macros</code> button (Click on the Developer Tab if you don’t see this)</li>
+</ol>
+<p><img src="images/macro_btn.png" /></p>
+<ol start="2" style="list-style-type: decimal">
+<li>Select the PERSONAL.XLSB!CheckData macro and click <code>Run</code></li>
+</ol>
+<p><img src="images/run_macro.png" /></p>
+<p><strong>To undo the formatting:</strong></p>
+<ol style="list-style-type: decimal">
+<li>Click on the Developer Tab</li>
+<li>Click Macros</li>
+<li>Run the PERSONAL.XLSB!RemoveFormatting macro to remove all formatting
+-or-</li>
+<li>Run the PERSONAL.XLSB!removeColumnFormatting to remove formatting for a single column</li>
+</ol>
+</div>
+</div>
             </section>
 
           </div>
         </div>
       </div>
-<a href="example-import.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
-
+<a href="workflow.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="editing-the-dictionary-sheet.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
     </div>
   </div>
 <script src="libs/gitbook-2.6.7/js/app.min.js"></script>

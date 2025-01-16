@@ -6,6 +6,7 @@ header-includes:
 output: 
   bookdown::gitbook:
     split_by: 'section'
+    number_section: false
     pandoc_args: [ "--csl", "Vancouver.csl" ]
     config:
       toc:
@@ -156,6 +157,14 @@ This is a work in progress!
 
 If you have comments/suggestions/bugfixes please raise an issue on gitHUB. 
 
+To do this:
+
+Go to the [issues page for the package](https://github.com/biostatsPMH/importExcel/issues)
+
+Click New Issue:
+
+![](images/new_issue.png)
+
 **Please DO NOT send an email.** Using gitHub allows everyone to see the issues and how they have been resolved.
 
 
@@ -276,6 +285,7 @@ if (dir.exists(folder_path)) {
 3.	The PERSONAL.XLSB!CheckData macro should appear in the list of macro names
 
 ![](images/run_macro.png)
+
 **That's it - you are all set to use the macro**
 
 # Workflow
@@ -286,8 +296,11 @@ tmp <- grViz('digraph{
 
       # Global graph settings
     splines = false;  # Use straight edges (no curvature)
-    graph[rankdir = TB]
-      
+    
+        graph[rankdir = LR]
+    
+    subgraph c1{  
+        graph[rankdir = TB]
     node[fontname = Helvetica, fontcolor = white,style="filled",
          shape = rectangle, fillcolor = "#8da242", margin = 0.25]
          A[label = "Receive \nExcel File"]
@@ -309,8 +322,10 @@ tmp <- grViz('digraph{
         E->G [label = "No"]
         E->F [label = "Yes"]
         F->H
+        {rank=same;B;E;}
         
-         }',width="50%",height="50%")
+        
+         }}',width="50%",height="50%")
 
 # Save as image
 tmp = DiagrammeRsvg::export_svg(tmp)
@@ -320,6 +335,7 @@ rsvg::rsvg_png(tmp, "images/workflow.png") # saved graph as png in current worki
 ```
 
 ![](images/workflow.png)
+
 ## Using the CheckData Macro
 This macro will:
 
