@@ -190,13 +190,36 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <div id="example-import" class="section level2 hasAnchor">
 <h2>Example Import<a href="example-import.html#example-import" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>You need to provide the function with the location (path and filename) of the Excel file, the name of the sheet containing the data and the name of the sheet containing the dictionary.</p>
-<p>Describe the coded data:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="example-import.html#cb3-1" tabindex="-1"></a><span class="fu">require</span>(tidyverse)</span>
-<span id="cb3-2"><a href="example-import.html#cb3-2" tabindex="-1"></a><span class="fu">require</span>(reportRmd)</span>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="example-import.html#cb3-1" tabindex="-1"></a><span class="fu">library</span>(importExcel)</span>
+<span id="cb3-2"><a href="example-import.html#cb3-2" tabindex="-1"></a>data_file <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;study_data.xlsx&quot;</span>, <span class="at">package =</span> <span class="st">&quot;importExcel&quot;</span>)</span>
 <span id="cb3-3"><a href="example-import.html#cb3-3" tabindex="-1"></a></span>
-<span id="cb3-4"><a href="example-import.html#cb3-4" tabindex="-1"></a>coded_data <span class="sc">|&gt;</span> </span>
-<span id="cb3-5"><a href="example-import.html#cb3-5" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">!</span>studyID) <span class="sc">|&gt;</span> </span>
-<span id="cb3-6"><a href="example-import.html#cb3-6" tabindex="-1"></a>  <span class="fu">rm_compactsum</span>(<span class="at">xvars=</span><span class="fu">everything</span>())</span></code></pre></div>
+<span id="cb3-4"><a href="example-import.html#cb3-4" tabindex="-1"></a><span class="co"># This will read in the file, add variable labels and recode variables to </span></span>
+<span id="cb3-5"><a href="example-import.html#cb3-5" tabindex="-1"></a><span class="co"># factors as specified in the dictionary sheet</span></span>
+<span id="cb3-6"><a href="example-import.html#cb3-6" tabindex="-1"></a>file_import <span class="ot">&lt;-</span> <span class="fu">read_excel_with_dictionary</span>(<span class="at">data_file =</span> data_file,</span>
+<span id="cb3-7"><a href="example-import.html#cb3-7" tabindex="-1"></a>                                          <span class="at">data_sheet =</span> <span class="st">&quot;data&quot;</span>,<span class="at">dictionary_sheet =</span> <span class="st">&quot;dict&quot;</span>)</span>
+<span id="cb3-8"><a href="example-import.html#cb3-8" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="example-import.html#cb3-9" tabindex="-1"></a><span class="co"># extract the recoded-data</span></span>
+<span id="cb3-10"><a href="example-import.html#cb3-10" tabindex="-1"></a>coded_data <span class="ot">&lt;-</span> file_import<span class="sc">$</span>coded_data</span>
+<span id="cb3-11"><a href="example-import.html#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="example-import.html#cb3-12" tabindex="-1"></a>file_import contains the following objects<span class="sc">:</span></span>
+<span id="cb3-13"><a href="example-import.html#cb3-13" tabindex="-1"></a><span class="co"># check warnings</span></span>
+<span id="cb3-14"><a href="example-import.html#cb3-14" tabindex="-1"></a>file_import<span class="sc">$</span>warnings</span>
+<span id="cb3-15"><a href="example-import.html#cb3-15" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="example-import.html#cb3-16" tabindex="-1"></a><span class="co"># check for text omitted from numeric data</span></span>
+<span id="cb3-17"><a href="example-import.html#cb3-17" tabindex="-1"></a>file_import<span class="sc">$</span>numeric_converstions</span>
+<span id="cb3-18"><a href="example-import.html#cb3-18" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="example-import.html#cb3-19" tabindex="-1"></a><span class="co"># check for attempted date conversions</span></span>
+<span id="cb3-20"><a href="example-import.html#cb3-20" tabindex="-1"></a>file_import<span class="sc">$</span>date_converstions</span>
+<span id="cb3-21"><a href="example-import.html#cb3-21" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="example-import.html#cb3-22" tabindex="-1"></a><span class="co"># Look at the dictionary used</span></span>
+<span id="cb3-23"><a href="example-import.html#cb3-23" tabindex="-1"></a>file_import<span class="sc">$</span>updated_dictionary</span></code></pre></div>
+<p>Describe the coded data:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="example-import.html#cb4-1" tabindex="-1"></a><span class="fu">require</span>(tidyverse)</span>
+<span id="cb4-2"><a href="example-import.html#cb4-2" tabindex="-1"></a><span class="fu">require</span>(reportRmd)</span>
+<span id="cb4-3"><a href="example-import.html#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="example-import.html#cb4-4" tabindex="-1"></a>coded_data <span class="sc">|&gt;</span> </span>
+<span id="cb4-5"><a href="example-import.html#cb4-5" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">!</span>studyID) <span class="sc">|&gt;</span> </span>
+<span id="cb4-6"><a href="example-import.html#cb4-6" tabindex="-1"></a>  <span class="fu">rm_compactsum</span>(<span class="at">xvars=</span><span class="fu">everything</span>())</span></code></pre></div>
 <pre><code>## no statistical tests will be applied to date variables, date variables will be summarised with median</code></pre>
 <table class="table table" style="margin-left: auto; margin-right: auto; margin-left: auto; margin-right: auto;">
 <thead>

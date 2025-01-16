@@ -191,37 +191,37 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <h2>Sample Data<a href="sec-sample-data.html#sec-sample-data" class="anchor-section" aria-label="Anchor link to header"></a></h2>
 <p>The package installs two sample files: <code>study_data.xlsx</code> and <code>study_data_messy.xlsx</code></p>
 <p>The following code can be copied and run to view the first file:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="sec-sample-data.html#cb5-1" tabindex="-1"></a>tidy_data <span class="ot">&lt;-</span> <span class="st">&quot;study_data.xlsx&quot;</span></span>
-<span id="cb5-2"><a href="sec-sample-data.html#cb5-2" tabindex="-1"></a>messy_data <span class="ot">&lt;-</span> <span class="st">&quot;study_data_messy.xlsx&quot;</span></span>
-<span id="cb5-3"><a href="sec-sample-data.html#cb5-3" tabindex="-1"></a></span>
-<span id="cb5-4"><a href="sec-sample-data.html#cb5-4" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, tidy_data, <span class="at">package =</span> <span class="st">&quot;importExcel&quot;</span>)</span>
-<span id="cb5-5"><a href="sec-sample-data.html#cb5-5" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="sec-sample-data.html#cb5-6" tabindex="-1"></a><span class="co"># Check if the file exists</span></span>
-<span id="cb5-7"><a href="sec-sample-data.html#cb5-7" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(file_path)) {</span>
-<span id="cb5-8"><a href="sec-sample-data.html#cb5-8" tabindex="-1"></a>  <span class="co"># Open the file using the default system application (Excel)</span></span>
-<span id="cb5-9"><a href="sec-sample-data.html#cb5-9" tabindex="-1"></a>  </span>
-<span id="cb5-10"><a href="sec-sample-data.html#cb5-10" tabindex="-1"></a>  <span class="co"># For Windows</span></span>
-<span id="cb5-11"><a href="sec-sample-data.html#cb5-11" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Windows&quot;</span>) {</span>
-<span id="cb5-12"><a href="sec-sample-data.html#cb5-12" tabindex="-1"></a>    <span class="fu">shell.exec</span>(file_path)</span>
-<span id="cb5-13"><a href="sec-sample-data.html#cb5-13" tabindex="-1"></a>  }</span>
-<span id="cb5-14"><a href="sec-sample-data.html#cb5-14" tabindex="-1"></a>  </span>
-<span id="cb5-15"><a href="sec-sample-data.html#cb5-15" tabindex="-1"></a>  <span class="co"># For macOS</span></span>
-<span id="cb5-16"><a href="sec-sample-data.html#cb5-16" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Darwin&quot;</span>) {</span>
-<span id="cb5-17"><a href="sec-sample-data.html#cb5-17" tabindex="-1"></a>    <span class="fu">system</span>(<span class="fu">paste</span>(<span class="st">&quot;open&quot;</span>, <span class="fu">shQuote</span>(file_path)))</span>
-<span id="cb5-18"><a href="sec-sample-data.html#cb5-18" tabindex="-1"></a>  }</span>
-<span id="cb5-19"><a href="sec-sample-data.html#cb5-19" tabindex="-1"></a>  </span>
-<span id="cb5-20"><a href="sec-sample-data.html#cb5-20" tabindex="-1"></a>  <span class="co"># For Linux</span></span>
-<span id="cb5-21"><a href="sec-sample-data.html#cb5-21" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Linux&quot;</span>) {</span>
-<span id="cb5-22"><a href="sec-sample-data.html#cb5-22" tabindex="-1"></a>    <span class="fu">system</span>(<span class="fu">paste</span>(<span class="st">&quot;xdg-open&quot;</span>, <span class="fu">shQuote</span>(file_path)))</span>
-<span id="cb5-23"><a href="sec-sample-data.html#cb5-23" tabindex="-1"></a>  }</span>
-<span id="cb5-24"><a href="sec-sample-data.html#cb5-24" tabindex="-1"></a>  </span>
-<span id="cb5-25"><a href="sec-sample-data.html#cb5-25" tabindex="-1"></a>  <span class="co"># If the OS is not recognized</span></span>
-<span id="cb5-26"><a href="sec-sample-data.html#cb5-26" tabindex="-1"></a>  <span class="cf">else</span> {</span>
-<span id="cb5-27"><a href="sec-sample-data.html#cb5-27" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Unable to open file: Unrecognized operating system&quot;</span>)</span>
-<span id="cb5-28"><a href="sec-sample-data.html#cb5-28" tabindex="-1"></a>  }</span>
-<span id="cb5-29"><a href="sec-sample-data.html#cb5-29" tabindex="-1"></a>} <span class="cf">else</span> {</span>
-<span id="cb5-30"><a href="sec-sample-data.html#cb5-30" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;File  not found in the package&#39;s inst/extdata directory&quot;</span>)</span>
-<span id="cb5-31"><a href="sec-sample-data.html#cb5-31" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="sec-sample-data.html#cb6-1" tabindex="-1"></a>tidy_data <span class="ot">&lt;-</span> <span class="st">&quot;study_data.xlsx&quot;</span></span>
+<span id="cb6-2"><a href="sec-sample-data.html#cb6-2" tabindex="-1"></a>messy_data <span class="ot">&lt;-</span> <span class="st">&quot;study_data_messy.xlsx&quot;</span></span>
+<span id="cb6-3"><a href="sec-sample-data.html#cb6-3" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="sec-sample-data.html#cb6-4" tabindex="-1"></a>file_path <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, tidy_data, <span class="at">package =</span> <span class="st">&quot;importExcel&quot;</span>)</span>
+<span id="cb6-5"><a href="sec-sample-data.html#cb6-5" tabindex="-1"></a></span>
+<span id="cb6-6"><a href="sec-sample-data.html#cb6-6" tabindex="-1"></a><span class="co"># Check if the file exists</span></span>
+<span id="cb6-7"><a href="sec-sample-data.html#cb6-7" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(file_path)) {</span>
+<span id="cb6-8"><a href="sec-sample-data.html#cb6-8" tabindex="-1"></a>  <span class="co"># Open the file using the default system application (Excel)</span></span>
+<span id="cb6-9"><a href="sec-sample-data.html#cb6-9" tabindex="-1"></a>  </span>
+<span id="cb6-10"><a href="sec-sample-data.html#cb6-10" tabindex="-1"></a>  <span class="co"># For Windows</span></span>
+<span id="cb6-11"><a href="sec-sample-data.html#cb6-11" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Windows&quot;</span>) {</span>
+<span id="cb6-12"><a href="sec-sample-data.html#cb6-12" tabindex="-1"></a>    <span class="fu">shell.exec</span>(file_path)</span>
+<span id="cb6-13"><a href="sec-sample-data.html#cb6-13" tabindex="-1"></a>  }</span>
+<span id="cb6-14"><a href="sec-sample-data.html#cb6-14" tabindex="-1"></a>  </span>
+<span id="cb6-15"><a href="sec-sample-data.html#cb6-15" tabindex="-1"></a>  <span class="co"># For macOS</span></span>
+<span id="cb6-16"><a href="sec-sample-data.html#cb6-16" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Darwin&quot;</span>) {</span>
+<span id="cb6-17"><a href="sec-sample-data.html#cb6-17" tabindex="-1"></a>    <span class="fu">system</span>(<span class="fu">paste</span>(<span class="st">&quot;open&quot;</span>, <span class="fu">shQuote</span>(file_path)))</span>
+<span id="cb6-18"><a href="sec-sample-data.html#cb6-18" tabindex="-1"></a>  }</span>
+<span id="cb6-19"><a href="sec-sample-data.html#cb6-19" tabindex="-1"></a>  </span>
+<span id="cb6-20"><a href="sec-sample-data.html#cb6-20" tabindex="-1"></a>  <span class="co"># For Linux</span></span>
+<span id="cb6-21"><a href="sec-sample-data.html#cb6-21" tabindex="-1"></a>  <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">Sys.info</span>()[<span class="st">&#39;sysname&#39;</span>] <span class="sc">==</span> <span class="st">&quot;Linux&quot;</span>) {</span>
+<span id="cb6-22"><a href="sec-sample-data.html#cb6-22" tabindex="-1"></a>    <span class="fu">system</span>(<span class="fu">paste</span>(<span class="st">&quot;xdg-open&quot;</span>, <span class="fu">shQuote</span>(file_path)))</span>
+<span id="cb6-23"><a href="sec-sample-data.html#cb6-23" tabindex="-1"></a>  }</span>
+<span id="cb6-24"><a href="sec-sample-data.html#cb6-24" tabindex="-1"></a>  </span>
+<span id="cb6-25"><a href="sec-sample-data.html#cb6-25" tabindex="-1"></a>  <span class="co"># If the OS is not recognized</span></span>
+<span id="cb6-26"><a href="sec-sample-data.html#cb6-26" tabindex="-1"></a>  <span class="cf">else</span> {</span>
+<span id="cb6-27"><a href="sec-sample-data.html#cb6-27" tabindex="-1"></a>    <span class="fu">message</span>(<span class="st">&quot;Unable to open file: Unrecognized operating system&quot;</span>)</span>
+<span id="cb6-28"><a href="sec-sample-data.html#cb6-28" tabindex="-1"></a>  }</span>
+<span id="cb6-29"><a href="sec-sample-data.html#cb6-29" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb6-30"><a href="sec-sample-data.html#cb6-30" tabindex="-1"></a>  <span class="fu">message</span>(<span class="st">&quot;File  not found in the package&#39;s inst/extdata directory&quot;</span>)</span>
+<span id="cb6-31"><a href="sec-sample-data.html#cb6-31" tabindex="-1"></a>}</span></code></pre></div>
 
 </div>
 <!-- </div> -->

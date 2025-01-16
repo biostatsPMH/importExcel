@@ -190,7 +190,7 @@ devtools::install_github("biostatsPMH/importExcel")
 ## Installing the Excel Macro
 
 
-The excel macro consists of two files that need to be stored in your personal.xlsb workbook: The `dataChecker.bas` file and the 'Dictionary.cls' file.
+The excel macro consists of two files that need to be stored in your personal.xlsb workbook: The `dataChecker.bas` file and the `Dictionary.cls` file.
 
 Once these two files are saved into your personal workbook the macro will be available on all the files you open in Excel. The macro stays on your machine in your workbook, it is not added to files that you check.
 
@@ -421,7 +421,7 @@ The function returns an object with four elements:
 
 You need to provide the function with the location (path and filename) of the Excel file, the name of the sheet containing the data and the name of the sheet containing the dictionary.
 
-```{r example, include=F,eval=F,echo=T}
+```{r example, eval=F,echo=T}
 library(importExcel)
 data_file <- system.file("extdata", "study_data.xlsx", package = "importExcel")
 
