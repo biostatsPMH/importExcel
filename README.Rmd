@@ -1,0 +1,169 @@
+---
+output: github_document
+always_allow_html: true
+---
+
+<!-- This file is used to create README.md
+-->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+
+```
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(reportRmd)
+
+```
+
+# importExcel
+
+importExcel is a department package to import data that has been checked with the internal UHN Biostatistics `dataChecker`. 
+
+The package has one main function which will read in the excel data, add the labels and recode factors based on the information provided in the data dictionary. 
+
+## Installation
+
+You can install the latest version of importExcel from [GitHub](https://github.com/) with:
+
+
+``` r
+# install.packages("devtools")
+devtools::install_github("biostatsPMH/importExcel")
+```
+
+## Documentation
+
+[Online Documentation](https://biostatsPMH.github.io/importExcel/)
+
+## Example 1: Tidy Data
+
+This is a nice clean data set 
+
+
+```{r example}
+library(importExcel)
+data_file <- system.file("extdata", "study_data.xlsx", package = "importExcel")
+
+# This will read in the file, add variable labels and recode variables to 
+# factors as specified in the dictionary sheet
+file_import <- read_excel_with_dictionary(data_file = data_file,
+                                          data_sheet = "data",dictionary_sheet = "dict")
+
+# extract the recoded-data
+coded_data <- file_import$coded_data
+
+# file_import contains the following objects:
+# # check warnings
+# file_import$warnings
+# 
+# # check for text omitted from numeric data
+# file_import$numeric_converstions
+# 
+# # check for attempted date conversions
+# file_import$date_converstions
+# 
+# # Look at the dictionary used
+# file_import$updated_dictionary
+
+```
+
+Describe the coded data:
+
+```{r}
+require(tidyverse)
+require(reportRmd)
+
+coded_data |> 
+  select(!studyID) |> 
+  rm_compactsum(xvars=everything())
+
+```
+
+## Example 2: Messier Data
+
+This data has messy dates which are converted to yyyy-mm-dd format for consistency
+```{r,warning=FALSE}
+
+data_file <- system.file("extdata", "study_data_messy.xlsx", package = "importExcel")
+
+# This will read in the file, add variable labels and recode variables to 
+# factors as specified in the dictionary sheet
+file_import <- read_excel_with_dictionary(data_file = data_file,
+                                          data_sheet = "data",dictionary_sheet = "dict")
+
+# extract the recoded-data
+coded_data <- file_import$coded_data
+
+
+
+```
+
+Describe the coded data:
+
+```{r}
+coded_data |> 
+  select(!studyID) |> 
+  rm_compactsum(xvars=everything())
+
+```
+
+Look at the numeric values not imported:
+
+```{r}
+file_import$numeric_conversions
+```
+
+Look at the converted date values (not run): 
+
+```{r, eval=F}
+file_import$date_conversions
+```
+
+
+## Sample Data
+
+The package installs two sample files: `study_data.xlsx` and `study_data_messy.xlsx`
+
+The following code can be copied and run to view the first file:
+
+```{r,eval=F}
+tidy_data <- "study_data.xlsx"
+messy_data <- "study_data_messy.xlsx"
+
+file_path <- system.file("extdata", tidy_data, package = "importExcel")
+
+# Check if the file exists
+if (file.exists(file_path)) {
+  # Open the file using the default system application (Excel)
+  
+  # For Windows
+  if (Sys.info()['sysname'] == "Windows") {
+    shell.exec(file_path)
+  }
+  
+  # For macOS
+  else if (Sys.info()['sysname'] == "Darwin") {
+    system(paste("open", shQuote(file_path)))
+  }
+  
+  # For Linux
+  else if (Sys.info()['sysname'] == "Linux") {
+    system(paste("xdg-open", shQuote(file_path)))
+  }
+  
+  # If the OS is not recognized
+  else {
+    message("Unable to open file: Unrecognized operating system")
+  }
+} else {
+  message("File 'study_data.xlsx' not found in the package's inst/extdata directory")
+}
+
+```

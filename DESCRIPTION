@@ -1,0 +1,25 @@
+Package: importExcel
+Type: Package
+Title: Functions to import and recode Excel data
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Lisa", "Aver",
+      email = "lisa.avery@uhn.ca",
+      role = c("aut", "cre")
+    )
+  )
+Description: This package works in conjunction with the dataChecker macro that 
+    checks Excel data and creates a data dictionary. Only files that have had
+    the macro run can be imported with this package.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    dplyr,
+    janitor,
+    lubridate,
+    readxl,
+    reportRmd,
+    tidyr
+RoxygenNote: 7.3.2
