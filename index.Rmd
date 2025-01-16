@@ -155,6 +155,9 @@ rsvg::rsvg_png(tmp, "images/flow.png") # saved graph as png in current working d
 
 This is a work in progress!
 
+Please feel free to contribute to the package. [Click here for github page](https://github.com/biostatsPMH/importExcel)
+
+
 If you have comments/suggestions/bugfixes please raise an issue on gitHUB. 
 
 To do this:
