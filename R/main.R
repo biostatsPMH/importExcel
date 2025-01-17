@@ -1,3 +1,4 @@
+
 #'Create a coded and labelled data frame from an Excel File
 #'
 #'Creates a cleaned, labelled and coded data set from data that the excel data
@@ -18,11 +19,13 @@
 #'@param  dates_as_character will format the dates in unambiguous yyyy-mm-dd
 #'  format and return character variables. This can be useful for identifying
 #'  date problems. The default is FALSE, to return date-type variables.
-#' @importFrom readxl read_excel excel_sheets
-#' @importFrom janitor excel_numeric_to_date
-#' @importFrom lubridate dmy mdy ymd
+#'@param na Character vector of strings to interpret as missing values. This
+#'  will be applied to the dictionary as well as the data
+#'@importFrom readxl read_excel excel_sheets
+#'@importFrom janitor excel_numeric_to_date
+#'@importFrom lubridate dmy mdy ymd
 #'@export
-read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE) {
+read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE,na="") {
   # check that the file exists
   if (!file.exists(data_file)) stop("The data file could not be found")
 
@@ -31,20 +34,27 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   if (!(data_sheet %in% sht_nms)) stop("The data sheet is not a sheet in the data file")
   if (!(dictionary_sheet %in% sht_nms)) stop("The dictionary sheet is not a sheet in the data file")
 
-  dict_import <- read_excel_with_warnings(data_file, dictionary_sheet)
+  dict_import <- read_excel_with_warnings(data_file, dictionary_sheet,na)
   dictionary <- dict_import$data
   # This is for older versions of the excel macro:
   last_ln_txt <- "The following variables are mostly text and should not be imported:"
   last_ln <- which(dictionary$Current_Variable_Name == last_ln_txt)
   if (length(last_ln) > 0)  dictionary <- dictionary[1:(last_ln - 1),]
-  imported_data <- read_excel_with_warnings(data_file, data_sheet)
+  imported_data <- read_excel_with_warnings(data_file, data_sheet,na)
   if (is.null(imported_data$data))
     stop(paste("Error reading the data:\n", imported_data$errorMsg))
   new_data <- imported_data$data
   to_rm <- which(grepl("^[...]",names(new_data)))
-  for (v in 1:ncol(new_data)) {
+  # columns with empty names in the data will be absent from the dictionary
+  # issue a warning an proceed
+  if (length(to_rm)>0){
+    warning(paste("Empty column name(s) found in column(s)",paste(to_rm,collapse = ", "),". These columns will not be imported.\nTo import add a column name and re-run the dataChecker macro to update the dictionary."))
+  }
+  for (v in setdiff(1:ncol(new_data),to_rm)) {
+
     new_name <- dictionary$Suggested_Name[which(dictionary$Column_Number ==
                                                         v)]
+    if (is.na(new_name)) stop(paste("The suggested name for column number",v,"is empty.\nPlease add a column name to the dictionary for this variable before import."))
     if (!(v %in% to_rm & length(new_name)==0)){
       to_rm <- setdiff(to_rm,v)
       if (substr(new_name,nchar(new_name),nchar(new_name))=="_") {
@@ -61,11 +71,13 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   }
 
   if ("Import" %in% names(dictionary)){
-    to_rm <- na.omit(dictionary[!dictionary$Import,"Column_Number"])
+    to_rm <- c(to_rm,na.omit(dictionary[["Column_Number"]][!dictionary$Import]))
     if (length(to_rm)>0)    new_data <- new_data[,-to_rm]
     dictionary <- dictionary |>
       tidyr::fill(Import) |>
       dplyr::filter(Import)
+  } else {
+    if (length(to_rm)>0)    new_data <- new_data[,-to_rm]
   }
 
   if (any(duplicated(names(new_data)))){
@@ -121,9 +133,11 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
       stop(paste(v, "not found in data -check dictionary spelling and column number"))
     orig <- new_data[[v]]
     num_data <- as.numeric(orig)
+    na_orig <- which(is.na(orig))
+    na_new <- which(is.na(num_data))
     new_data[[v]] <- num_data
-    if (length(orig[which(is.na(num_data))])>0)
-      num_conversions[[v]] <- paste("non-numeric values removed:",paste(orig[which(is.na(num_data))],collapse = ", "))
+    if (length(setdiff(na_orig,na_new))>0)
+      num_conversions[[v]] <- paste("non-numeric values removed:",paste(orig[setdiff(na_orig,na_new)],collapse = ", "))
   }
 
   date_cols <- dplyr::pull(dplyr::filter(dictionary,
@@ -169,14 +183,14 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
 
 # Function to read Excel file and capture warnings
 
-read_excel_with_warnings <- function(data_file,data_sheet) {
+read_excel_with_warnings <- function(data_file,data_sheet,na) {
   warnings_list <- list()  # Initialize a list to store warnings
   errorMsg <- NULL
   # Use try to capture warnings
   result <- try({
     withCallingHandlers({
       # Read the Excel file
-      data <- readxl::read_excel(data_file,data_sheet)
+      data <- readxl::read_excel(data_file,data_sheet,na=na)
     }, warning = function(w) {
       warnings_list <<- c(warnings_list, conditionMessage(w))
       invokeRestart("muffleWarning")

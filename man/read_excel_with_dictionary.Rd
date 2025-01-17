@@ -8,7 +8,8 @@ read_excel_with_dictionary(
   data_file,
   data_sheet,
   dictionary_sheet,
-  dates_as_character = FALSE
+  dates_as_character = FALSE,
+  na = ""
 )
 }
 \arguments{
@@ -22,6 +23,9 @@ must be formatted by the PMHbiostats macro file}
 \item{dates_as_character}{will format the dates in unambiguous yyyy-mm-dd
 format and return character variables. This can be useful for identifying
 date problems. The default is FALSE, to return date-type variables.}
+
+\item{na}{Character vector of strings to interpret as missing values. This
+will be applied to the dictionary as well as the data}
 }
 \description{
 Creates a cleaned, labelled and coded data set from data that the excel data
