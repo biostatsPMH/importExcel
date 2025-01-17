@@ -108,7 +108,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
     }
   }
 
-  # Categorical variables stay as characters
+  # Categorical variables are converted to factors
   cat_variables <- dplyr::pull(dplyr::filter(dictionary,
                                              Type == "Categorical"), Suggested_Name)
   for (v in cat_variables) {
@@ -116,12 +116,17 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
       stop(paste(v, "not found in data -check dictionary spelling and column number"))
     lvl_lbl <- dplyr::select(dplyr::filter(tidyr::fill(dictionary,
                                                        Suggested_Name, .direction = "down"), Suggested_Name ==
-                                             v), Value, Value_Label)
-    if (any(!is.na(lvl_lbl$Value_Label))){
-      new_data[[v]] <- as.character(factor(new_data[[v]], levels = lvl_lbl$Value,
-                                           labels = lvl_lbl$Value_Label))
-
+                                             v), Value, Value_Label) |>
+      dplyr::distinct()
+    # Check for duplicate values - this can happen with spaces
+    if (any(duplicated(lvl_lbl$Value))) {
+      stop(paste("Duplicated variable values found in",v,".\nCheck the data dictionary."))
     }
+    if (any(!is.na(lvl_lbl$Value_Label))){
+      new_data[[v]] <- factor(new_data[[v]], levels = lvl_lbl$Value,
+                                           labels = lvl_lbl$Value_Label)
+
+    } else {new_data[[v]] <- factor(new_data[[v]], levels = lvl_lbl$Value)}
   }
 
   # Numeric variables are converted to numeric and any text is removed
