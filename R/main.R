@@ -40,6 +40,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   last_ln_txt <- "The following variables are mostly text and should not be imported:"
   last_ln <- which(dictionary$Current_Variable_Name == last_ln_txt)
   if (length(last_ln) > 0)  dictionary <- dictionary[1:(last_ln - 1),]
+
   imported_data <- read_excel_with_warnings(data_file, data_sheet,na)
   if (is.null(imported_data$data))
     stop(paste("Error reading the data:\n", imported_data$errorMsg))
@@ -50,6 +51,16 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   if (length(to_rm)>0){
     warning(paste("Empty column name(s) found in column(s)",paste(to_rm,collapse = ", "),". These columns will not be imported.\nTo import add a column name and re-run the dataChecker macro to update the dictionary."))
   }
+  # ensure that variables don't start with "_"
+  flag_ <- FALSE
+  for (sn in na.omit(dictionary$Suggested_Name)){
+    if (substr(sn,1,1)=="_") {
+      dictionary$Suggested_Name[which(dictionary$Suggested_Name==sn)] <- sub("_","v",sn)
+      flag_ <- TRUE
+    }
+  }
+  if (flag_) message("Suggested names beginning with '_' were replaced with 'v'.\nRefer to updated dictionary.")
+
   for (v in setdiff(1:ncol(new_data),to_rm)) {
 
     new_name <- dictionary$Suggested_Name[which(dictionary$Column_Number ==
