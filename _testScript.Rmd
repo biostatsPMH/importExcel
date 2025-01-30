@@ -1,0 +1,41 @@
+---
+title: ""
+author: 
+  name: "Lisa Avery lisa.avery@uhn.ca"
+  institute: "Biostatistics@UHN" 
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+format:
+  html:
+    toc: TRUE
+  docx:
+    fig-height: 4
+    fig-width: 6.5
+#    reference-doc: 'wordTemplate.docx'
+  pdf:
+    fig-height: 4
+    fig-width: 6.5
+#bibliography: bibfile.bib  
+editor: source
+execute: 
+  echo: false
+  warning: false
+  message: false
+knitr:
+  opts_chunk: 
+    comment: ""
+    dpi: 300     
+---
+
+```{r}
+data_file <- "inst/extdata/study_data_messy.xlsx"
+file.exists(data_file)
+data_sheet="data"
+dictionary_sheet = "dict"
+dates_as_character=FALSE
+na=""
+
+
+imported_data <- read_excel_with_dictionary(data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE,na="") 
+View(imported_data$coded_data)
+```
+

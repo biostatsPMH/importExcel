@@ -61,6 +61,8 @@ Dim n_unique_expected As Integer
 ' prompt the user for the maximum number of codes expected
 n_unique_expected = Application.InputBox("Please entered the maximum number of unique codes expected for a variable, or click OK to use the default:", Default:=10, Title:="PMH Datachecker", Type:=1)
 
+If n_unique_expected = vbCancel Then Exit Sub
+
  ' Turn off screen updating
     Application.ScreenUpdating = False
     
@@ -217,7 +219,7 @@ For c = 1 To ncol
     
     ' add warning if these don't match
     If len_unique > (UBound(uniqueLowerCase) + 1) Then
-        If len_unique < 10 Then
+        If len_unique <= n_unique_expected Then
             msgText = "Data Checks:" & Chr(10) & "Case must be consistent, check values" & Chr(10) & Join(uniqueColVals, vbLf)
         Else
             msgText = "Data Checks:" & Chr(10) & "This column appears to have inconsistent formatting"
@@ -289,7 +291,7 @@ For c = 1 To ncol
             ' All numeric
             If len_unique <= n_unique_expected Then vType = "Codes" Else vType = "Numeric"
             
-        ElseIf len_unique < n_unique_expected Then
+        ElseIf len_unique <= n_unique_expected Then
             vType = "Categorical"
         ' If there are a lot of text cells (more than half) then assume this is a text column
         ' otherwise, if the first cell is numeric assume it is suppose to be numeric and that the data are messy
@@ -318,7 +320,7 @@ For c = 1 To ncol
         fullCol.Borders.ColorIndex = 3
     End If
 
-    If vType = "" And len_unique < 10 Then
+    If vType = "" And len_unique <= n_unique_expected Then
         vType = "Categorical"
     ElseIf vType = "" Then vType = "Text"
     End If
@@ -625,14 +627,14 @@ Sub ProcessColumns()
         Next cell
         
         ' Check the number of unique values
-        If uniqueCount <= 10 Then
+        If uniqueCount <= n_unique_expected Then
             ' Place unique values in a new row in the UniqueValuesSheet
             newSheet.Cells(1, columnCount).value = "VariableName" & columnCount
             For i = 1 To uniqueCount
                 newSheet.Cells(i + 1, columnCount).value = uniqueValues(i)
             Next i
         Else
-            ' More than 10 unique values
+            ' More than n_unique_expected unique values
             ' Check if the data is numeric or date
             If isNumericOrDate Then
                 ' Place min and max values in the second and third columns
