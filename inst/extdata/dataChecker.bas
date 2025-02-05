@@ -128,9 +128,11 @@ For r = 1 To (firstdatarow - 1)
 Next r
         
 ' Check for empty rows, columns
+Dim emptyFirstDataRow As Boolean
 For r = 1 To nrow
     Set fullRow = Cells(r, 1).EntireRow
     If Application.WorksheetFunction.CountA(fullRow) = 0 Then
+    If r = 2 Then emptyFirstDataRow = True
         With fullRow.Interior
             .Pattern = xlSolid
             .PatternColorIndex = xlAutomatic
@@ -139,7 +141,7 @@ For r = 1 To nrow
             .PatternTintAndShade = 0
         End With
         Cells(r, 1).AddComment
-        Cells(r, 1).Comment.Visible = True
+'        Cells(r, 1).Comment.Visible = True
 '        Cells(r, 1).Comment.Text Text:="Data Checks:" & Chr(10) & "Please remove empy rows"
     End If
 Next r
@@ -181,7 +183,7 @@ For c = 1 To ncol
             .PatternTintAndShade = 0
         End With
         Cells(1, c).AddComment
-        Cells(1, c).Comment.Visible = True
+'        Cells(1, c).Comment.Visible = True
  '       Cells(1, c).Comment.Text Text:="Data Checks:" & Chr(10) & "Please remove empy columns"
     End If
 Next c
@@ -230,7 +232,7 @@ For c = 1 To ncol
     End If
     
     'Get the variable name
-    vName = Cells(firstdatarow - 1, c).value
+    vName = Cells(1, c).value
     
     ' Determine the data type
     vType = ""
@@ -478,13 +480,10 @@ For rw = 2 To lastVarRow
 
     
     If varName <> newname Then duplColFlag = False
-    ' ActiveCell.Offset(0, 1).Value = newname  ' this is the suggested new variable name
     newSheet.Range("A1").Offset(rw - 1, 1).value = newname
     newname = Replace(newname, "_", " ")
     newname = Trim(newname)
-    ' ActiveCell.Offset(0, 2).Value = newname  ' this is the suggested new variable label
     newSheet.Range("A1").Offset(rw - 1, 2).value = newname
-    'ActiveCell.Offset(1, 0).Activate
     End If
 Next rw
 
@@ -754,7 +753,11 @@ Dim allMatches As Object
 Dim RE As Object
 newtext = text
 
+If IsFirstCharacterNumber(text) Then newtext = "v" & newtext
+
 On Error GoTo macWorkAround
+
+' Code for Windows
 Set RE = CreateObject("vbscript.regexp")
 
 RE.Pattern = "[^a-zA-Z0-9]"
@@ -774,6 +777,7 @@ End If
 ReplaceSpecial = newtext
 Exit Function
 
+'Code for Mac:
 macWorkAround:
     newtext = Replace(newtext, "!", "_")
     newtext = Replace(newtext, "@", "_")
@@ -839,4 +843,22 @@ End Function
 
 
 
+Function IsFirstCharacterNumber(ByVal text As String) As Boolean
+    Dim firstChar As String
+    
+    ' Check if the cell is not empty
+    If Not IsEmpty(text) Then
+        ' Get the first character of the cell value
+        firstChar = Left(text, 1)
+        
+        ' Check if the first character is a number
+        If IsNumeric(firstChar) Then
+            IsFirstCharacterNumber = True
+        Else
+            IsFirstCharacterNumber = False
+        End If
+    Else
+        IsFirstCharacterNumber = False
+    End If
+End Function
 

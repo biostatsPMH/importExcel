@@ -27,6 +27,7 @@
 #'@importFrom readxl read_excel excel_sheets
 #'@importFrom janitor excel_numeric_to_date
 #'@importFrom lubridate dmy mdy ymd
+#'@importFrom rlang sym
 #'@export
 read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE,na="") {
   # check that the file exists

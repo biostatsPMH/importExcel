@@ -436,9 +436,9 @@ file_import <- read_excel_with_dictionary(data_file = data_file,
 # extract the recoded-data
 coded_data <- file_import$coded_data
 
-file_import contains the following objects:
-# check warnings
-file_import$warnings
+# file_import contains the following objects:
+# check import warnings
+file_import$import_warnings
 
 # check for text omitted from numeric data
 file_import$numeric_converstions
