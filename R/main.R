@@ -118,8 +118,13 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
                                                        Suggested_Name, .direction = "down"), Suggested_Name ==
                                              v), Value, Value_Label)
     if (any(!is.na(lvl_lbl$Value_Label))){
-      new_data[[v]] <- factor(new_data[[v]], levels = lvl_lbl$Value,
-                              labels = lvl_lbl$Value_Label)
+      n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
+                        labels = lvl_lbl$Value_Label))
+      if (!inherits(n_f,"try-error")) {
+        new_data[[v]] <- n_f
+      } else {
+        warning(paste0("Error coding",v,". Check for missing values in dictionary.\nVariable not recoded."))
+      }
     }
   }
 
@@ -127,6 +132,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   cat_variables <- dplyr::pull(dplyr::filter(dictionary,
                                              Type == "Categorical"), Suggested_Name)
   for (v in cat_variables) {
+
     if (!(v %in% names(new_data)))
       stop(paste(v, "not found in data -check dictionary spelling and column number"))
     lvl_lbl <- dplyr::select(dplyr::filter(tidyr::fill(dictionary,
@@ -138,10 +144,16 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
       stop(paste("Duplicated variable values found in",v,".\nCheck the data dictionary."))
     }
     if (any(!is.na(lvl_lbl$Value_Label))){
-      new_data[[v]] <- factor(new_data[[v]], levels = lvl_lbl$Value,
-                              labels = lvl_lbl$Value_Label)
 
-    } else {new_data[[v]] <- factor(new_data[[v]], levels = lvl_lbl$Value)}
+      n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
+                        labels = lvl_lbl$Value_Label))
+    } else {
+      n_f <- factor(new_data[[v]], levels = lvl_lbl$Value)}
+    if (!inherits(n_f,"try-error")) {
+      new_data[[v]] <- n_f
+    } else {
+      warning(paste("Error converting",v,"to factor. Check for missing values in dictionary.\nVariable not recoded."))
+    }
   }
 
   # Numeric variables are converted to numeric and any text is removed
@@ -268,37 +280,37 @@ parse_date <- function(x) {
     }
   } else {
     # If formatted dates
-      # Try dmy
+    # Try dmy
+    msgs <- capture.output(
+      dt <- try(lubridate::dmy(trimws(x)), silent = TRUE),
+      type = "message"
+    )
+    if (!is.na(dt)) {
+      dt_type <- "dmy"
+      parsing_format <- msgs
+    } else {
+      # Try mdy
       msgs <- capture.output(
-        dt <- try(lubridate::dmy(trimws(x)), silent = TRUE),
+        dt <- try(lubridate::mdy(trimws(x)), silent = TRUE),
         type = "message"
       )
       if (!is.na(dt)) {
-        dt_type <- "dmy"
+        dt_type <- "mdy"
         parsing_format <- msgs
       } else {
-        # Try mdy
+        # Try ymd
         msgs <- capture.output(
-          dt <- try(lubridate::mdy(trimws(x)), silent = TRUE),
+          dt <- try(lubridate::ymd(trimws(x)), silent = TRUE),
           type = "message"
         )
         if (!is.na(dt)) {
-          dt_type <- "mdy"
+          dt_type <- "ymd"
           parsing_format <- msgs
         } else {
-          # Try ymd
-          msgs <- capture.output(
-            dt <- try(lubridate::ymd(trimws(x)), silent = TRUE),
-            type = "message"
-          )
-          if (!is.na(dt)) {
-            dt_type <- "ymd"
-            parsing_format <- msgs
-          } else {
-            dt_type <- "error"
-            parsing_format <- "none"
-          }
+          dt_type <- "error"
+          parsing_format <- "none"
         }
+      }
 
 
     }
@@ -351,8 +363,8 @@ clean_dates <- function(parsed_date) {
   }
   if (multiple_formats){
     parsed_date <- parsed_date |>
-    dplyr::mutate(
-    date_check = format(lubridate::ymd(parsed),"%Y-%b-%d"))
+      dplyr::mutate(
+        date_check = format(lubridate::ymd(parsed),"%Y-%b-%d"))
   }
   out <-parsed_date |>
     dplyr::select(dplyr::any_of(c("original","parsed","date_check")))

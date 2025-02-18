@@ -39,3 +39,16 @@ imported_data <- read_excel_with_dictionary(data_file, data_sheet, dictionary_sh
 View(imported_data$coded_data)
 ```
 
+
+```{r}
+library(devtools)
+load_all()
+data_file <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
+data_sheet <-"Alireza_data"
+dictionary_sheet <- "Alizera_dict"
+dates_as_character=FALSE;na=""
+alizera_data_import <- read_excel_with_dictionary(data_file,data_sheet,dictionary_sheet)
+alizera_data <- alizera_data_import$coded_data
+
+```
+

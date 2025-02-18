@@ -29,11 +29,14 @@ will be applied to the dictionary as well as the data}
 }
 \description{
 Creates a cleaned, labelled and coded data set from data that the excel data
-checker has been run on
+checker has been run on.
 }
 \details{
 The variable labels from the dictionary are added, factors are created from
-coded variables and date variables are converted to character representation.
+coded variables and date variables are converted to consistent formatting. If
+multiple date formats are found within a column, then an attempt is made to
+correctly parse the dates. In this case, two date variables will be returned
+tagged with _original and _cleaned suffixes.
 
 The following columns are expected to appear in the dictionary:
 Current_Variable_Name,	Suggested_Name,	Label_For_Report,	Type,	Value,
