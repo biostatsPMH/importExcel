@@ -119,7 +119,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
                                              v), Value, Value_Label)
     if (any(!is.na(lvl_lbl$Value_Label))){
       n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
-                        labels = lvl_lbl$Value_Label))
+                        labels = lvl_lbl$Value_Label),silent=T)
       if (!inherits(n_f,"try-error")) {
         new_data[[v]] <- n_f
       } else {
@@ -146,7 +146,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
     if (any(!is.na(lvl_lbl$Value_Label))){
 
       n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
-                        labels = lvl_lbl$Value_Label))
+                        labels = lvl_lbl$Value_Label),silent=T)
     } else {
       n_f <- factor(new_data[[v]], levels = lvl_lbl$Value)}
     if (!inherits(n_f,"try-error")) {
