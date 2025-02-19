@@ -47,8 +47,29 @@ data_file <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
 data_sheet <-"Alireza_data"
 dictionary_sheet <- "Alizera_dict"
 dates_as_character=FALSE;na=""
-alizera_data_import <- read_excel_with_dictionary(data_file,data_sheet,dictionary_sheet)
+
+sht_nms <- readxl::excel_sheets(filenm)
+
+alizera_data_import <- importExcel::read_excel_with_dictionary(filenm,sht_nms[1],sht_nms[2])
 alizera_data <- alizera_data_import$coded_data
 
+data_file <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
+data_sheet <- sht_nms[3]
+dictionary_sheet <- sht_nms[4]
+ati_xsec_data_import <- importExcel::read_excel_with_dictionary(filenm,sht_nms[3],sht_nms[4])
+ati_xsec_data <- ati_xsec_data_import$coded_data
+names(ati_xsec_data)
+ati_long_data <- ati_long_data_import$coded_data
+
+```
+
+
+```{r}
+data_file <- "R/ALL_ANDREW_CLINICAL_INFORMATION.xlsx"
+data_sheet <-"data"
+dictionary_sheet <- "dict"
+dates_as_character=FALSE;na=""
+andrew_data_import <- read_excel_with_dictionary(data_file,data_sheet="data",dictionary_sheet = "dict")
+andrew_data <- andrew_data_import$coded_data
 ```
 

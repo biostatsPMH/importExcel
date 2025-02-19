@@ -40,6 +40,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
 
   dict_import <- read_excel_with_warnings(data_file, dictionary_sheet,na)
   dictionary <- dict_import$data
+
   # This is for older versions of the excel macro:
   last_ln_txt <- "The following variables are mostly text and should not be imported:"
   last_ln <- which(dictionary$Current_Variable_Name == last_ln_txt)
@@ -49,9 +50,13 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   if (is.null(imported_data$data))
     stop(paste("Error reading the data:\n", imported_data$errorMsg))
   new_data <- imported_data$data
-  to_rm <- which(grepl("^[...]",names(new_data)))
   # columns with empty names in the data will be absent from the dictionary
-  # issue a warning an proceed
+  to_rm <- which(grepl("^[...]",names(new_data)))
+  if (!all(names(new_data)[setdiff(1:ncol(new_data),to_rm)] == na.omit(dictionary$Current_Variable_Name[which(!is.na(dictionary$Column_Number))]))){
+    stop("The column names in the data do not match the Current_Variable_Name in the dictionary.\nDid you specify the correct data and dictionary sheets?")
+  }
+
+  # issue a warning and proceed
   if (length(to_rm)>0){
     warning(paste("Empty column name(s) found in column(s)",paste(to_rm,collapse = ", "),". These columns will not be imported.\nTo import add a column name and re-run the dataChecker macro to update the dictionary."))
   }
@@ -67,9 +72,13 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
 
   for (v in setdiff(1:ncol(new_data),to_rm)) {
 
-    new_name <- dictionary$Suggested_Name[which(dictionary$Column_Number ==
-                                                  v)]
-    if (is.na(new_name)) stop(paste("The suggested name for column number",v,"is empty.\nPlease add a column name to the dictionary for this variable before import."))
+    new_name <- dictionary$Suggested_Name[which(dictionary$Column_Number ==v)]
+
+    if (is.na(new_name)) {
+      if ("Import" %in% names(dictionary)){
+        if (dictionary$Import[which(dictionary$Column_Number ==v)]) {
+          stop(paste("The suggested name for column number",v,"is empty.\nPlease add a column name to the dictionary for this variable before import."))
+        } else new_name="to_be_deleted"}}
     if (!(v %in% to_rm & length(new_name)==0)){
       to_rm <- setdiff(to_rm,v)
       if (substr(new_name,nchar(new_name),nchar(new_name))=="_") {
@@ -85,142 +94,143 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
     }
   }
 
-  if ("Import" %in% names(dictionary)){
-    to_rm <- c(to_rm,na.omit(dictionary[["Column_Number"]][!dictionary$Import]))
-    if (length(to_rm)>0)    new_data <- new_data[,-to_rm]
-    dictionary <- dictionary |>
-      tidyr::fill(Import) |>
-      dplyr::filter(Import)
-  } else {
-    if (length(to_rm)>0)    new_data <- new_data[,-to_rm]
-  }
 
-  if (any(duplicated(names(new_data)))){
-    message("Duplicated variable names found.\nTo prevent this ensure distinct values in the Suggested_Name column in the data dictionary.")
+if ("Import" %in% names(dictionary)){
+  to_rm <- c(to_rm,na.omit(dictionary[["Column_Number"]][!dictionary$Import]))
+  if (length(to_rm)>0)    new_data <- new_data[,-to_rm]
+  dictionary <- dictionary |>
+    tidyr::fill(Import) |>
+    dplyr::filter(Import)
+} else {
+  if (length(to_rm)>0)    new_data <- new_data[,-to_rm]
+}
+
+if (any(duplicated(names(new_data)))){
+  message("Duplicated variable names found.\nTo prevent this ensure distinct values in the Suggested_Name column in the data dictionary.")
+  first_dupl <- which(duplicated(names(new_data)))[1]
+  repeat{
+    dupl_nm <- names(new_data)[first_dupl]
+    dupl_ind <- which(names(new_data)==dupl_nm)
+    new_names <- paste0(dupl_nm,"_",1:length(dupl_ind))
+    names(new_data)[dupl_ind] <- new_names
+    dictionary$Suggested_Name[which(dictionary$Column_Number %in% dupl_ind)] <- new_names
+    if (!any(duplicated(names(new_data)))) break
     first_dupl <- which(duplicated(names(new_data)))[1]
-    repeat{
-      dupl_nm <- names(new_data)[first_dupl]
-      dupl_ind <- which(names(new_data)==dupl_nm)
-      new_names <- paste0(dupl_nm,"_",1:length(dupl_ind))
-      names(new_data)[dupl_ind] <- new_names
-      dictionary$Suggested_Name[which(dictionary$Column_Number %in% dupl_ind)] <- new_names
-      if (!any(duplicated(names(new_data)))) break
-      first_dupl <- which(duplicated(names(new_data)))[1]
-    }
   }
-  # Make codes into factors
-  fct_variables <- dplyr::pull(dplyr::filter(dictionary,
-                                             Type == "Codes"), Suggested_Name)
-  for (v in fct_variables) {
-    if (!(v %in% names(new_data)))
-      stop(paste(v, "not found in data -check dictionary spelling and column number"))
-    lvl_lbl <- dplyr::select(dplyr::filter(tidyr::fill(dictionary,
-                                                       Suggested_Name, .direction = "down"), Suggested_Name ==
-                                             v), Value, Value_Label)
-    if (any(!is.na(lvl_lbl$Value_Label))){
-      n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
-                        labels = lvl_lbl$Value_Label),silent=T)
-      if (!inherits(n_f,"try-error")) {
-        new_data[[v]] <- n_f
-      } else {
-        warning(paste0("Error coding",v,". Check for missing values in dictionary.\nVariable not recoded."))
-      }
-    }
-  }
-
-  # Categorical variables are converted to factors
-  cat_variables <- dplyr::pull(dplyr::filter(dictionary,
-                                             Type == "Categorical"), Suggested_Name)
-  for (v in cat_variables) {
-
-    if (!(v %in% names(new_data)))
-      stop(paste(v, "not found in data -check dictionary spelling and column number"))
-    lvl_lbl <- dplyr::select(dplyr::filter(tidyr::fill(dictionary,
-                                                       Suggested_Name, .direction = "down"), Suggested_Name ==
-                                             v), Value, Value_Label) |>
-      dplyr::distinct()
-    # Check for duplicate values - this can happen with spaces
-    if (any(duplicated(lvl_lbl$Value))) {
-      stop(paste("Duplicated variable values found in",v,".\nCheck the data dictionary."))
-    }
-    if (any(!is.na(lvl_lbl$Value_Label))){
-
-      n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
-                        labels = lvl_lbl$Value_Label),silent=T)
-    } else {
-      n_f <- factor(new_data[[v]], levels = lvl_lbl$Value)}
+}
+# Make codes into factors
+fct_variables <- dplyr::pull(dplyr::filter(dictionary,
+                                           Type == "Codes"), Suggested_Name)
+for (v in fct_variables) {
+  if (!(v %in% names(new_data)))
+    stop(paste(v, "not found in data -check dictionary spelling and column number"))
+  lvl_lbl <- dplyr::select(dplyr::filter(tidyr::fill(dictionary,
+                                                     Suggested_Name, .direction = "down"), Suggested_Name ==
+                                           v), Value, Value_Label)
+  if (any(!is.na(lvl_lbl$Value_Label))){
+    n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
+                      labels = lvl_lbl$Value_Label),silent=T)
     if (!inherits(n_f,"try-error")) {
       new_data[[v]] <- n_f
     } else {
-      warning(paste("Error converting",v,"to factor. Check for missing values in dictionary.\nVariable not recoded."))
+      warning(paste0("Error coding",v,". Check for missing values in dictionary.\nVariable not recoded."))
     }
   }
+}
 
-  # Numeric variables are converted to numeric and any text is removed
-  num_variables <-  dplyr::pull(dplyr::filter(dictionary,
-                                              Type == "Numeric"), Suggested_Name)
-  num_conversions <- NULL
-  for (v in num_variables) {
-    if (!(v %in% names(new_data)))
-      stop(paste(v, "not found in data -check dictionary spelling and column number"))
-    orig <- new_data[[v]]
-    num_data <- suppressWarnings(as.numeric(orig))
-    na_orig <- which(is.na(orig))
-    na_new <- which(is.na(num_data))
-    new_data[[v]] <- num_data
-    if (length(setdiff(na_orig,na_new))>0)
-      num_conversions[[v]] <- paste("non-numeric values removed:",paste(orig[setdiff(na_orig,na_new)],collapse = ", "))
+# Categorical variables are converted to factors
+cat_variables <- dplyr::pull(dplyr::filter(dictionary,
+                                           Type == "Categorical"), Suggested_Name)
+for (v in cat_variables) {
+
+  if (!(v %in% names(new_data)))
+    stop(paste(v, "not found in data -check dictionary spelling and column number"))
+  lvl_lbl <- dplyr::select(dplyr::filter(tidyr::fill(dictionary,
+                                                     Suggested_Name, .direction = "down"), Suggested_Name ==
+                                           v), Value, Value_Label) |>
+    dplyr::distinct()
+  # Check for duplicate values - this can happen with spaces
+  if (any(duplicated(lvl_lbl$Value))) {
+    stop(paste("Duplicated variable values found in",v,".\nCheck the data dictionary."))
+  }
+  if (any(!is.na(lvl_lbl$Value_Label))){
+
+    n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
+                      labels = lvl_lbl$Value_Label),silent=T)
+  } else {
+    n_f <- factor(new_data[[v]], levels = lvl_lbl$Value)}
+  if (!inherits(n_f,"try-error")) {
+    new_data[[v]] <- n_f
+  } else {
+    warning(paste("Error converting",v,"to factor. Check for missing values in dictionary.\nVariable not recoded."))
+  }
+}
+
+# Numeric variables are converted to numeric and any text is removed
+num_variables <-  dplyr::pull(dplyr::filter(dictionary,
+                                            Type == "Numeric"), Suggested_Name)
+num_conversions <- NULL
+for (v in num_variables) {
+  if (!(v %in% names(new_data)))
+    stop(paste(v, "not found in data -check dictionary spelling and column number"))
+  orig <- new_data[[v]]
+  num_data <- suppressWarnings(as.numeric(orig))
+  na_orig <- which(is.na(orig))
+  na_new <- which(is.na(num_data))
+  new_data[[v]] <- num_data
+  if (length(setdiff(na_orig,na_new))>0)
+    num_conversions[[v]] <- paste("non-numeric values removed:",paste(orig[setdiff(na_orig,na_new)],collapse = ", "))
+}
+
+date_cols <- dplyr::pull(dplyr::filter(dictionary,
+                                       Type == "Date"), Suggested_Name)
+dt_conversions <- NULL
+
+for (v in date_cols) {
+  dt_msg <- NULL
+  parsed_dates <- lapply(new_data[[v]], parse_date)
+  dt_conversion <- dplyr::bind_rows(parsed_dates)
+  cleaned_dates <- suppressMessages(clean_dates(dt_conversion))
+  if (cleaned_dates$errors) {
+    msg <- paste("Errors in",v,"not all dates could be read.")
+    dt_msg <- c(dt_msg,msg)
+  }
+  if (cleaned_dates$multiple_formats) {
+    msg <- paste("Multiple date formats in",v,"check dates carefully.")
+    dt_msg <- c(dt_msg,msg)
+  }
+  if (any(cleaned_dates$cleaned_dates$parsed>Sys.Date(),na.rm=T)) {
+    msg <- paste0("Dates in the future found in ",v,".")
+    dt_msg <- c(dt_msg,msg)
   }
 
-  date_cols <- dplyr::pull(dplyr::filter(dictionary,
-                                         Type == "Date"), Suggested_Name)
-  dt_conversions <- NULL
+  # if there are problems, maintain original and cleaned variables
+  if (cleaned_dates$errors || cleaned_dates$multiple_formats){
+    names(new_data) <- gsub(v,paste0(v,"_original"),names(new_data))
+    new_data[[paste0(v,"_cleaned")]] <- cleaned_dates$cleaned_dates$parsed
+    new_data <- new_data |>
+      dplyr::relocate(!!rlang::sym(paste0(v,"_cleaned")), .after = !!rlang::sym(paste0(v,"_original")))
+    dt_conversions <- dplyr::bind_rows(dt_conversions,
+                                       data.frame(variable=v,warnings=dt_msg))
+  } else new_data[[v]] <- cleaned_dates$cleaned_dates$parsed
 
-  for (v in date_cols) {
-    dt_msg <- NULL
-    parsed_dates <- lapply(new_data[[v]], parse_date)
-    dt_conversion <- dplyr::bind_rows(parsed_dates)
-    cleaned_dates <- suppressMessages(clean_dates(dt_conversion))
-    if (cleaned_dates$errors) {
-      msg <- paste("Errors in",v,"not all dates could be read.")
-      dt_msg <- c(dt_msg,msg)
-    }
-    if (cleaned_dates$multiple_formats) {
-      msg <- paste("Multiple date formats in",v,"check dates carefully.")
-      dt_msg <- c(dt_msg,msg)
-    }
-    if (any(cleaned_dates$cleaned_dates$parsed>Sys.Date(),na.rm=T)) {
-      msg <- paste0("Dates in the future found in ",v,".")
-      dt_msg <- c(dt_msg,msg)
-    }
+}
 
-    # if there are problems, maintain original and cleaned variables
-    if (cleaned_dates$errors || cleaned_dates$multiple_formats){
-      names(new_data) <- gsub(v,paste0(v,"_original"),names(new_data))
-      new_data[[paste0(v,"_cleaned")]] <- cleaned_dates$cleaned_dates$date_check
-      new_data <- new_data |>
-        dplyr::relocate(!!rlang::sym(paste0(v,"_cleaned")), .after = !!rlang::sym(paste0(v,"_original")))
-      dt_conversions <- dplyr::bind_rows(dt_conversions,
-                                         data.frame(variable=v,warnings=dt_msg))
-    } else new_data[[v]] <- cleaned_dates$cleaned_dates$parsed
+new_data <- reportRmd::set_labels(new_data, dplyr::select(dictionary,
+                                                          Suggested_Name, Label_For_Report))
 
-  }
+if (!is.null(num_conversions)) {
+  message("Numeric Variable Warnings:" )
+  print(num_conversions)}
+if (!is.null(dt_conversions)) {
+  message("Date Warnings:" )
+  print(dt_conversions)}
 
-  new_data <- reportRmd::set_labels(new_data, dplyr::select(dictionary,
-                                                            Suggested_Name, Label_For_Report))
-
-  if (!is.null(num_conversions)) {
-    message("Numeric Variable Warnings:" )
-    print(num_conversions)}
-  if (!is.null(dt_conversions)) {
-    message("Date Warnings:" )
-    print(dt_conversions)}
-
-  return(list(coded_data = new_data,
-              updated_dictionary = dictionary,
-              import_warnings = imported_data$warnings,
-              numeric_conversions = num_conversions,
-              date_warnings = dt_conversions))
+return(list(coded_data = new_data,
+            updated_dictionary = dictionary,
+            import_warnings = imported_data$warnings,
+            numeric_conversions = num_conversions,
+            date_warnings = dt_conversions))
 }
 
 # Function to read Excel file and capture warnings
