@@ -26,6 +26,14 @@ knitr:
     dpi: 300     
 ---
 
+```{r setup}
+library(tidyverse)
+library(devtools)
+library(janitor)
+library(reportRmd)
+
+```
+
 ```{r}
 data_file <- "inst/extdata/study_data_messy.xlsx"
 file.exists(data_file)
@@ -41,9 +49,8 @@ View(imported_data$coded_data)
 
 
 ```{r}
-library(devtools)
 load_all()
-data_file <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
+data_file <- filenm <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
 data_sheet <-"Alireza_data"
 dictionary_sheet <- "Alizera_dict"
 dates_as_character=FALSE;na=""
@@ -53,14 +60,23 @@ sht_nms <- readxl::excel_sheets(filenm)
 alizera_data_import <- importExcel::read_excel_with_dictionary(filenm,sht_nms[1],sht_nms[2])
 alizera_data <- alizera_data_import$coded_data
 
-data_file <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
+data_file <- filenm <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
 data_sheet <- sht_nms[3]
 dictionary_sheet <- sht_nms[4]
-ati_xsec_data_import <- importExcel::read_excel_with_dictionary(filenm,sht_nms[3],sht_nms[4])
+ati_xsec_data_import <- read_excel_with_dictionary(filenm,sht_nms[3],sht_nms[4])
 ati_xsec_data <- ati_xsec_data_import$coded_data
 names(ati_xsec_data)
 ati_long_data <- ati_long_data_import$coded_data
 
+
+ati_xsec_data |> 
+  tabyl(IDH1_Status)
+
+ati_xsec_data$IDH1_Status
+rm_compactsum(ati_xsec_data,xvars = c(IDH1_Status))
+rm_compactsum(ati_xsec_data,xvars = c(Age,Sex))
+
+save(ati_xsec_data, file = "../ati_xsec_data.rda")
 ```
 
 
