@@ -89,3 +89,9 @@ andrew_data_import <- read_excel_with_dictionary(data_file,data_sheet="data",dic
 andrew_data <- andrew_data_import$coded_data
 ```
 
+
+```{r}
+data_file <- "updated_EX-CIPN Data_Mar43.xlsx"
+physical_df <- read_excel_with_dictionary(data_file,data_sheet="Physical Assessment",dictionary_sheet = "physical_dictionary")
+```
+
