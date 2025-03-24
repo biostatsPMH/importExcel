@@ -53,7 +53,8 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
 
   # columns with empty names in the data will be absent from the dictionary
   to_rm <- which(grepl("^[...]",names(new_data)))
-  if (!all(names(new_data)[setdiff(1:ncol(new_data),to_rm)] == na.omit(dictionary$Current_Variable_Name[which(!is.na(dictionary$Column_Number))]))){
+
+  if (!all(gsub("[...].*","",names(new_data)[setdiff(1:ncol(new_data),to_rm)]) == na.omit(dictionary$Current_Variable_Name))){
     stop("The column names in the data do not match the Current_Variable_Name in the dictionary.\nDid you specify the correct data and dictionary sheets?")
   }
 

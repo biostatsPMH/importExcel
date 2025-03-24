@@ -49,6 +49,16 @@ View(imported_data$coded_data)
 
 
 ```{r}
+library(devtools)
+load_all()
+data_file <- filenm <- "R/Final Excel Spreadsheet PPROM.xlsx"
+
+
+read_excel_with_dictionary(filenm,data_sheet = "for_import",dictionary_sheet =  "dict")
+
+```
+
+```{r}
 load_all()
 data_file <- filenm <- "R/Copy of Sheets_all_collab_data_glioma_LA.xlsx"
 data_sheet <-"Alireza_data"
@@ -91,7 +101,8 @@ andrew_data <- andrew_data_import$coded_data
 
 
 ```{r}
-data_file <- "updated_EX-CIPN Data_Mar43.xlsx"
+data_file <- "R/updated_EX-CIPN Data_Mar43.xlsx"
 physical_df <- read_excel_with_dictionary(data_file,data_sheet="Physical Assessment",dictionary_sheet = "physical_dictionary")
+
 ```
 
