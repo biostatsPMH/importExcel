@@ -47,6 +47,14 @@ imported_data <- read_excel_with_dictionary(data_file, data_sheet, dictionary_sh
 View(imported_data$coded_data)
 ```
 
+```{r}
+updated_filenme <- "R/ALL_ANDREW_CLINICAL_INFORMATION_Mar26.xlsx"
+imported <- read_excel_with_dictionary(data_file=updated_filenme,data_sheet="Sheet1",dictionary_sheet = "dict") # updated 26 mar 2025
+
+imported$coded_data$Type
+
+```
+
 
 ```{r}
 library(devtools)
@@ -54,8 +62,8 @@ load_all()
 data_file <- filenm <- "R/Final Excel Spreadsheet PPROM.xlsx"
 
 
-read_excel_with_dictionary(filenm,data_sheet = "for_import",dictionary_sheet =  "dict")
-
+test <-read_excel_with_dictionary(filenm,data_sheet = "for_import",dictionary_sheet =  "dict")
+names(test$coded_data)
 ```
 
 ```{r}
@@ -104,5 +112,14 @@ andrew_data <- andrew_data_import$coded_data
 data_file <- "R/updated_EX-CIPN Data_Mar43.xlsx"
 physical_df <- read_excel_with_dictionary(data_file,data_sheet="Physical Assessment",dictionary_sheet = "physical_dictionary")
 
+```
+
+```{r}
+current_file <- data_file <- "/Users/lisaavery/Library/CloudStorage/OneDrive-UHN/Kirsch/SARC032_patient_outcomes_2025_03_05_forImport.xlsx"
+data_sheet = "for_import"
+dictionary_sheet = "dict"
+read_excel_with_dictionary(data_file = current_file,
+                                        data_sheet = "for_import",
+                                        dictionary_sheet = "dict")
 ```
 

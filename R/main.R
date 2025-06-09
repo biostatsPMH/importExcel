@@ -54,8 +54,8 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   # columns with empty names in the data will be absent from the dictionary
   to_rm <- which(grepl("^[...]",names(new_data)))
 
-  if (!all(gsub("[...].*","",names(new_data)[setdiff(1:ncol(new_data),to_rm)]) == na.omit(dictionary$Current_Variable_Name))){
-    stop("The column names in the data do not match the Current_Variable_Name in the dictionary.\nDid you specify the correct data and dictionary sheets?")
+  if (!all(gsub("\\.{3}.*","",names(new_data)[setdiff(1:ncol(new_data),to_rm)]) == na.omit(dictionary$Current_Variable_Name))){
+    stop("The column names in the data do not exactly match the Current_Variable_Name in the dictionary.\nDid you specify the correct data and dictionary sheets?")
   }
 
   # issue a warning and proceed
@@ -73,7 +73,6 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   if (flag_) message("Suggested names beginning with '_' were replaced with 'v'.\nRefer to updated dictionary.")
 
   for (v in setdiff(1:ncol(new_data),to_rm)) {
-
     new_name <- dictionary$Suggested_Name[which(dictionary$Column_Number ==v)]
 
     if (is.na(new_name)) {
