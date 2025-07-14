@@ -31,6 +31,17 @@ library(tidyverse)
 library(devtools)
 library(janitor)
 library(reportRmd)
+load_all()
+
+```
+
+```{r}
+data_file = "/Users/lisaavery/Library/CloudStorage/OneDrive-UHN/Diamondis/GliomaGrant/combined_glioma_data_andrew_alizera_ati_9Jul2025.xlsx"
+
+data_sheet = "Sheet 1"
+dictionary_sheet = "dict"
+
+imported_data <- read_excel_with_dictionary(data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE,na="") 
 
 ```
 

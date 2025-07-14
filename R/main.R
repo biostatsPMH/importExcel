@@ -317,7 +317,7 @@ parse_date <- function(x) {
         )
         if (!is.na(dt)) {
           dt_type <- "ymd"
-          parsing_format <- msgs
+          parsing_format <- paste(msgs,collapse = ";")
         } else {
           dt_type <- "error"
           parsing_format <- "none"
