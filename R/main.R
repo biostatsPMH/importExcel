@@ -333,7 +333,7 @@ parse_date <- function(x) {
     parsed = as.character(dt),
     format = dt_type,
     parsing = parsing_format
-  )
+  ) |> slice_head(n=1)
 }
 
 

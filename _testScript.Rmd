@@ -36,6 +36,17 @@ load_all()
 ```
 
 ```{r}
+
+data_file = "/Users/lisaavery/Library/CloudStorage/OneDrive-UHN/Gonzalez/CODED ENDOMETRIAL CANCER DATABASE.xlsx"
+
+data_sheet = "BASE DE DATOS PARTE 1 (2)"
+dictionary_sheet = "Sheet2"
+
+imported_data <- read_excel_with_dictionary(data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE,na="") 
+
+```
+
+```{r}
 data_file = "/Users/lisaavery/Library/CloudStorage/OneDrive-UHN/Diamondis/GliomaGrant/combined_glioma_data_andrew_alizera_ati_9Jul2025.xlsx"
 
 data_sheet = "Sheet 1"
