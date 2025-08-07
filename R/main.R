@@ -129,6 +129,8 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
                                                        Suggested_Name, .direction = "down"), Suggested_Name ==
                                              v), Value, Value_Label)
     if (any(!is.na(lvl_lbl$Value_Label))){
+      lvl_lbl <- lvl_lbl |>
+        dplyr::filter(!is.na(Value_Label))
       n_f <- try(factor(new_data[[v]], levels = lvl_lbl$Value,
                         labels = lvl_lbl$Value_Label),silent=T)
       if (!inherits(n_f,"try-error")) {
@@ -333,7 +335,7 @@ parse_date <- function(x) {
     parsed = as.character(dt),
     format = dt_type,
     parsing = parsing_format
-  ) |> slice_head(n=1)
+  ) |> dplyr::slice_head(n=1)
 }
 
 

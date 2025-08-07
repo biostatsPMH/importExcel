@@ -24,7 +24,7 @@ library(reportRmd)
 
 # importExcel
 
-importExcel is a department package to import data that has been checked with the internal UHN Biostatistics `dataChecker`. 
+importExcel is a department package to import data that has been checked with the internal UHN Biostatistics `dataChecker` macro. 
 
 The package has one main function which will read in the excel data, add the labels and recode factors based on the information provided in the data dictionary. 
 

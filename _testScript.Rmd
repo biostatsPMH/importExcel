@@ -37,9 +37,13 @@ load_all()
 
 ```{r}
 
+```
+
+```{r}
+
 data_file = "/Users/lisaavery/Library/CloudStorage/OneDrive-UHN/Gonzalez/CODED ENDOMETRIAL CANCER DATABASE.xlsx"
 
-data_sheet = "BASE DE DATOS PARTE 1 (2)"
+data_sheet = "For_import"
 dictionary_sheet = "Sheet2"
 
 imported_data <- read_excel_with_dictionary(data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE,na="") 

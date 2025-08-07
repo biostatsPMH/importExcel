@@ -1,17 +1,18 @@
 Package: importExcel
 Type: Package
 Title: Functions to import and recode Excel data
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person(
-      "Lisa", "Aver",
+      "Lisa", "Avery",
       email = "lisa.avery@uhn.ca",
       role = c("aut", "cre")
     )
   )
 Description: This package works in conjunction with the dataChecker macro that 
     checks Excel data and creates a data dictionary. Only files that have had
-    the macro run can be imported with this package.
+    the macro run, or use an identical format can be imported with this package.
+    The macro, and installation instructions are available on GitHub.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
