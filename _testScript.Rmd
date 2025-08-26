@@ -36,6 +36,20 @@ load_all()
 ```
 
 ```{r}
+data_file = "/Users/lisaavery/Library/CloudStorage/OneDrive-UHN/Metser/Prostate_ADT/Final PSMA Database without MRNs.xlsx"
+data_sheet =  "PSMAADT_final_clean_forimport"
+dictionary_sheet = "dictionary"
+
+
+imported_data <- read_excel_with_dictionary(data_file, data_sheet, dictionary_sheet,dates_as_character=FALSE,na="") 
+check <- imported_data$coded_data
+View(check)
+
+# Check through the cleaned and original variables
+chk_vars <- grep("_original",names(check),value=T)
+for (v in chk_vars){
+  print(all(as.Date(check[[v]]) == as.Date(check[[gsub("_original","_cleaned",v)]]),na.rm=T))
+}
 
 ```
 

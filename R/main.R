@@ -41,6 +41,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   dict_import <- read_excel_with_warnings(data_file, dictionary_sheet,na)
   dictionary <- dict_import$data
 
+
   # This is for older versions of the excel macro:
   last_ln_txt <- "The following variables are mostly text and should not be imported:"
   last_ln <- which(dictionary$Current_Variable_Name == last_ln_txt)
@@ -51,7 +52,10 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
     stop(paste("Error reading the data:\n", imported_data$errorMsg))
   new_data <- imported_data$data
 
-  # columns with empty names in the data will be absent from the dictionary
+  # text only import
+  text_import <- readxl::read_excel(path=data_file, sheet=data_sheet,na=na,col_types = "date")
+
+    # columns with empty names in the data will be absent from the dictionary
   to_rm <- which(grepl("^[...]",names(new_data)))
 
   if (!all(gsub("\\.{3}.*","",names(new_data)[setdiff(1:ncol(new_data),to_rm)]) == na.omit(dictionary$Current_Variable_Name))){
@@ -120,6 +124,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
     }
   }
   # Make codes into factors
+  message("Converting coded columns to factors.....")
   fct_variables <- dplyr::pull(dplyr::filter(dictionary,
                                              Type == "Codes"), Suggested_Name)
   for (v in fct_variables) {
@@ -142,6 +147,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   }
 
   # Categorical variables are converted to factors
+  message("Converting categorical columns to factors .....")
   cat_variables <- dplyr::pull(dplyr::filter(dictionary,
                                              Type == "Categorical"), Suggested_Name)
   for (v in cat_variables) {
@@ -171,6 +177,7 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
   }
 
   # Numeric variables are converted to numeric and any text is removed
+  message("Converting numeric columns.....")
   num_variables <-  dplyr::pull(dplyr::filter(dictionary,
                                               Type == "Numeric"), Suggested_Name)
   num_conversions <- NULL
@@ -186,6 +193,8 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
       num_conversions[[v]] <- paste("non-numeric values removed:",paste(orig[setdiff(na_orig,na_new)],collapse = ", "))
   }
 
+  # Date Columns
+  message("Converting date columns.....")
   date_cols <- dplyr::pull(dplyr::filter(dictionary,
                                          Type == "Date"), Suggested_Name)
   dt_conversions <- NULL
@@ -194,7 +203,9 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
     dt_msg <- NULL
     parsed_dates <- lapply(new_data[[v]], parse_date)
     dt_conversion <- dplyr::bind_rows(parsed_dates)
+
     cleaned_dates <- suppressMessages(clean_dates(dt_conversion))
+
     if (cleaned_dates$errors) {
       msg <- paste("Errors in",v,"not all dates could be read.")
       dt_msg <- c(dt_msg,msg)
@@ -207,16 +218,19 @@ read_excel_with_dictionary <- function (data_file, data_sheet, dictionary_sheet,
       msg <- paste0("Dates in the future found in ",v,".")
       dt_msg <- c(dt_msg,msg)
     }
-
-    # if there are problems, maintain original and cleaned variables
-    if (cleaned_dates$errors || cleaned_dates$multiple_formats){
-      names(new_data) <- gsub(v,paste0(v,"_original"),names(new_data))
-      new_data[[paste0(v,"_cleaned")]] <- cleaned_dates$cleaned_dates$parsed
-      new_data <- new_data |>
-        dplyr::relocate(!!rlang::sym(paste0(v,"_cleaned")), .after = !!rlang::sym(paste0(v,"_original")))
-      dt_conversions <- dplyr::bind_rows(dt_conversions,
-                                         data.frame(variable=v,warnings=dt_msg))
-    } else new_data[[v]] <- cleaned_dates$cleaned_dates$parsed
+    new_data[[v]] <- cleaned_dates$cleaned_dates$parsed
+    # if there are problems, maintain original (text import) and cleaned variables
+    # # this actually isn't necessary - removed 26 August 2025
+    # if (cleaned_dates$errors || cleaned_dates$multiple_formats){
+    #   names(new_data)[which(names(new_data)==v)] <- gsub(v,paste0(v,"_original"),v)
+    #   txt_nm <- dictionary |> filter(Suggested_Name==v) |> pull(Current_Variable_Name)
+    #   new_data[[gsub(v,paste0(v,"_original"),v)]] <- text_import[[txt_nm]]
+    #   new_data[[paste0(v,"_cleaned")]] <- cleaned_dates$cleaned_dates$parsed
+    #   new_data <- new_data |>
+    #     dplyr::relocate(!!rlang::sym(paste0(v,"_cleaned")), .after = !!rlang::sym(paste0(v,"_original")))
+    #   dt_conversions <- dplyr::bind_rows(dt_conversions,
+    #                                      data.frame(variable=v,warnings=dt_msg))
+    # } else new_data[[v]] <- cleaned_dates$cleaned_dates$parsed
 
   }
 
@@ -330,12 +344,13 @@ parse_date <- function(x) {
     }
   }
   options(warn = 0)
-  data.frame(
+  out <- data.frame(
     original = orig_value,
     parsed = as.character(dt),
     format = dt_type,
     parsing = parsing_format
-  ) |> dplyr::slice_head(n=1)
+  )
+  if (nrow(out)>0) return(out |> dplyr::slice_head(n=1)) else return(out)
 }
 
 
@@ -344,7 +359,6 @@ clean_dates <- function(parsed_date) {
   if (!all(names(parsed_date) == c("original", "parsed", "format", "parsing"))) {
     stop("Parsed date must be data output from parse_data'")
   }
-
   format_types <- data.frame(with(parsed_date,table(parsing,format))) |>
     dplyr::filter(Freq!=0)
 
